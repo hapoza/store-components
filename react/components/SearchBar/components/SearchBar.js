@@ -8,88 +8,81 @@ import { NoSSR } from 'vtex.render-runtime'
 
 import styles from '../styles.css'
 
-export default class SearchBar extends Component {
-  render() {
-    const {
-      placeholder,
-      emptyPlaceholder,
-      onEnterPress,
-      onMakeSearch,
-      onInputChange,
-      onGoToSearchPage,
-      onClearInput,
-      shouldSearch,
-      inputValue,
-      compactMode,
-      hasIconLeft, 
-      iconClasses,
-    } = this.props
+const SearchBar = ({
+  placeholder,
+  emptyPlaceholder,
+  onEnterPress,
+  onMakeSearch,
+  onInputChange,
+  onGoToSearchPage,
+  onClearInput,
+  shouldSearch,
+  inputValue,
+  compactMode,
+  hasIconLeft,
+  iconClasses,
+}) => {
+  const fallback = (
+    <AutocompleteInput
+      placeholder={placeholder}
+      onMakeSearch={onMakeSearch}
+      onInputChange={onInputChange}
+      onGoToSearchPage={onGoToSearchPage}
+      inputValue={inputValue}
+      hasIconLeft={hasIconLeft}
+      iconClasses={iconClasses}
+    />
+  )
 
-    const fallback = (
-      <AutocompleteInput
-        placeholder={placeholder}
-        onMakeSearch={onMakeSearch}
-        onInputChange={onInputChange}
-        onGoToSearchPage={onGoToSearchPage}
-        inputValue={inputValue}
-        hasIconLeft={hasIconLeft}
-        iconClasses={iconClasses}
-      />
-    )
-    
-    const mainClasses = classNames(styles.searchBarContainer)
-
-    return (
-      <div className={mainClasses}>
-        <NoSSR onSSR={fallback}>
-          <DownshiftComponent>
-            {({
-              getInputProps,
-              selectedItem,
-              highlightedIndex,
-              isOpen,
-              closeMenu,
-            }) => (
-                <div className="relative-m w-100">
-                  <AutocompleteInput
-                    compactMode={compactMode}
-                    onClearInput={onClearInput}
-                    hasIconLeft={hasIconLeft}
-                    iconClasses={iconClasses}
-                    onGoToSearchPage={() => {
-                      closeMenu()
-                      onGoToSearchPage()
-                    }}
-                    {...getInputProps({
-                      placeholder,
-                      value: inputValue,
-                      onChange: onInputChange,
-                      onKeyDown: event => {
-                        closeMenu()
-                        onEnterPress(event)
-                      },
-                    })}
-
-                  />
-                  {shouldSearch && isOpen ? (
-                    <ResultsLits
-                      {...{
-                        inputValue,
-                        selectedItem,
-                        highlightedIndex,
-                        emptyPlaceholder,
-                        closeMenu,
-                        onClearInput,
-                      }}
-                    />
-                  ) : null}
-                </div>
-              )}
-          </DownshiftComponent>
-        </NoSSR>
-      </div>
-    )
-  }
+  return (
+    <div className={styles.searchBarContainer}>
+      <NoSSR onSSR={fallback}>
+        <DownshiftComponent>
+          {({
+            getInputProps,
+            selectedItem,
+            highlightedIndex,
+            isOpen,
+            closeMenu,
+          }) => (
+            <div className="relative-m w-100">
+              <AutocompleteInput
+                compactMode={compactMode}
+                onClearInput={onClearInput}
+                hasIconLeft={hasIconLeft}
+                iconClasses={iconClasses}
+                onGoToSearchPage={() => {
+                  closeMenu()
+                  onGoToSearchPage()
+                }}
+                {...getInputProps({
+                  placeholder,
+                  value: inputValue,
+                  onChange: onInputChange,
+                  onKeyDown: event => {
+                    closeMenu()
+                    onEnterPress(event)
+                  },
+                })}
+              />
+              {shouldSearch && isOpen ? (
+                <ResultsLits
+                  {...{
+                    inputValue,
+                    selectedItem,
+                    highlightedIndex,
+                    emptyPlaceholder,
+                    closeMenu,
+                    onClearInput,
+                  }}
+                />
+              ) : null}
+            </div>
+          )}
+        </DownshiftComponent>
+      </NoSSR>
+    </div>
+  )
 }
 
 SearchBar.propTypes = {
@@ -116,5 +109,7 @@ SearchBar.propTypes = {
   /** Identify if the search icon is on left or right position */
   hasIconLeft: PropTypes.bool,
   /** Custom classes for the search icon */
-  iconClasses: PropTypes.string 
+  iconClasses: PropTypes.string,
 }
+
+export default SearchBar
