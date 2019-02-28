@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import SearchBar from './components/SearchBar'
 import { injectIntl, intlShape } from 'react-intl'
@@ -6,30 +6,28 @@ import { injectIntl, intlShape } from 'react-intl'
 const SEARCH_DELAY_TIME = 500
 
 /** Canonical search bar that uses the autocomplete endpoint to search for a specific product*/
-class SearchBarContainer extends Component {
-  timeoutId = null
+const SearchBarContainer = (
+  { intl, compactMode, hasIconLeft, iconClasses }, //props
+  context
+) => {
+  let timeoutId = null
+  const [shouldSearch, setShouldSearch] = useState(false)
+  const [inputValue, setInputValue] = useState('')
 
-  state = {
-    shouldSearch: false,
-    inputValue: '',
+  const handleClearSearchResults = () => {
+    setShouldSearch(false)
+    timeoutId = null
   }
 
-  handleClearSearchResults = () => {
-    this.setState({ shouldSearch: false })
-
-    this.timeoutId = null
+  const handleClearInput = () => {
+    setInputValue('')
+    handleClearSearchResults()
   }
 
-  handleClearInput = () => {
-    this.setState({ inputValue: '' })
-    this.handleClearSearchResults()
-  }
-
-  handleGoToSearchPage = () => {
-    const search = this.state.inputValue
-
-    this.setState({ inputValue: '' })
-    this.context.navigate({
+  const handleGoToSearchPage = () => {
+    const search = inputValue
+    setInputValue('')
+    context.navigate({
       page: 'store.search',
       params: { term: search },
       query: 'map=ft',
@@ -37,58 +35,45 @@ class SearchBarContainer extends Component {
     })
   }
 
-  handleEnterPress = event => {
-    if (event.key === 'Enter') {
-      this.handleGoToSearchPage()
-    }
-  }
+  const handleEnterPress = event =>
+    event.key === 'Enter' && handleGoToSearchPage()
 
-  handleMakeSearch = () => {
-    this.handleClearSearchResults()
-
-    this.timeoutId = setTimeout(() => {
-      this.setState({ shouldSearch: true })
+  const handleMakeSearch = () => {
+    handleClearSearchResults()
+    timeoutId = setTimeout(() => {
+      setShouldSearch(true)
     }, SEARCH_DELAY_TIME)
   }
 
-  handleInputChange = event => {
+  const handleInputChange = event => {
     const value = event.target.value
-
-    this.setState({ inputValue: value })
-
-    if (value.length < 2) {
-      this.handleClearSearchResults()
-    } else this.handleMakeSearch()
+    setInputValue(value)
+    value.length < 2 ? handleClearSearchResults() : handleMakeSearch()
   }
 
-  render() {
-    const { intl, compactMode, hasIconLeft, iconClasses } = this.props
-    const { shouldSearch, inputValue } = this.state
+  const placeholder = intl.formatMessage({
+    id: 'search.placeholder',
+  })
+  const emptyPlaceholder = intl.formatMessage({
+    id: 'search.noMatches',
+  })
 
-    const placeholder = intl.formatMessage({
-      id: 'search.placeholder',
-    })
-    const emptyPlaceholder = intl.formatMessage({
-      id: 'search.noMatches',
-    })
-
-    return (
-      <SearchBar
-        placeholder={placeholder}
-        emptyPlaceholder={emptyPlaceholder}
-        shouldSearch={shouldSearch}
-        inputValue={inputValue}
-        onClearInput={this.handleClearInput}
-        onGoToSearchPage={this.handleGoToSearchPage}
-        onEnterPress={this.handleEnterPress}
-        onMakeSearch={this.handleMakeSearch}
-        onInputChange={this.handleInputChange}
-        compactMode={compactMode}
-        hasIconLeft={hasIconLeft}
-        iconClasses={iconClasses}
-      />
-    )
-  }
+  return (
+    <SearchBar
+      placeholder={placeholder}
+      emptyPlaceholder={emptyPlaceholder}
+      shouldSearch={shouldSearch}
+      inputValue={inputValue}
+      onClearInput={handleClearInput}
+      onGoToSearchPage={handleGoToSearchPage}
+      onEnterPress={handleEnterPress}
+      onMakeSearch={handleMakeSearch}
+      onInputChange={handleInputChange}
+      compactMode={compactMode}
+      hasIconLeft={hasIconLeft}
+      iconClasses={iconClasses}
+    />
+  )
 }
 
 SearchBarContainer.contextTypes = {
@@ -103,7 +88,7 @@ SearchBarContainer.propTypes = {
   /** Identify if the search icon is on left or right position */
   hasIconLeft: PropTypes.bool,
   /** Custom classes for the search icon */
-  iconClasses: PropTypes.string
+  iconClasses: PropTypes.string,
 }
 
 export default injectIntl(SearchBarContainer)
