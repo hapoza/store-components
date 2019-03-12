@@ -1,7 +1,6 @@
 import React from 'react'
 import { render } from 'intl-helper'
 import { fireEvent } from 'react-testing-library'
-import wait from 'waait'
 
 import BuyButton from '../../BuyButton'
 
@@ -57,14 +56,19 @@ describe('<BuyButton />', () => {
     expect(onAddStart).toHaveBeenCalled()
   })
 
-  it('should call onAddEnd', async () => {
+  it('should call onAddEnd', done => {
     const onAddFinish = jest.fn()
     const { getByText } = renderComponent({
       available: true,
       skuItems: [],
       onAddFinish,
     })
+
     fireEvent.click(getByText(/test/i))
-    expect(onAddFinish).toHaveBeenCalled()
+
+    setTimeout(() => {
+      expect(onAddFinish).toHaveBeenCalled()
+      done()
+    }, 300)
   })
 })
